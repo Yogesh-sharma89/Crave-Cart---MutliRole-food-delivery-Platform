@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap');
+
+@import "tailwindcss";
+
+
+
+
+/* ==========================================================================
+   CRAVECART TAILWIND V4 PRODUCTION THEME CONFIGURATION
+   ========================================================================== */
+
+@theme {
+  /* ------------------------------------------------------------------------
+     1. TYPOGRAPHY & FONTS
+     ------------------------------------------------------------------------ */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Fira Code', monospace;
+
+  /* Font Sizes */
+  --text-2xs: 0.625rem;   /* 10px - Badges, tiny tags */
+  --text-xs: 0.75rem;     /* 12px - Secondary badges, timestamps */
+  --text-sm: 0.875rem;    /* 14px - Inputs, metadata, secondary body */
+  --text-base: 1rem;      /* 16px - Primary body text, default buttons */
+  --text-md: 1.125rem;    /* 18px - Card titles, subheaders */
+  --text-lg: 1.25rem;     /* 20px - Modal titles, section subheaders */
+  --text-xl: 1.5rem;      /* 24px - Section headers */
+  --text-2xl: 1.875rem;   /* 30px - Page titles */
+  --text-3xl: 2.25rem;    /* 36px - Hero subheaders */
+  --text-hero: 3rem;      /* 48px - Main Hero display text */
+
+  /* ------------------------------------------------------------------------
+     2. COLOR PALETTE (CRAVECART BRAND TOKENS)
+     ------------------------------------------------------------------------ */
+  /* Primary Brand (Crave Crimson) */
+  --color-primary: #A9743A;
+  --color-primary-hover: #96652F;
+  --color-primary-active: #7F5527;
+  --color-primary-light: #FBF3E7;
+  --color-primary-subtle: #F3E4CD;
+
+  /* Secondary Accent (Warm Amber / Ratings) */
+    --color-secondary: #D9A441;
+  --color-secondary-hover: #C29236;
+  --color-secondary-light: #FBF0DD;
+
+  /* Background Canvas & Surfaces */
+--color-app-bg: #F1EAE0;         /* App canvas background */
+  --color-surface: #FFFFFF;        /* Cards, modals, navbars */
+  --color-surface-hover: #FAF6EF;  /* Interactive rows/cards hover */
+  --color-subtle: #F1E3CC;         /* Inputs, disabled state background */
+  --color-dark-bg: #1C1712;        /* Dark banners, footers, obsidian panels */
+ 
+
+  /* Typography / Text Colors */
+--color-text-main: #1C1712;      /* Headings & primary body */
+  --color-text-muted: #8A7A67;     /* Subtitles, secondary text */
+  --color-text-subtle: #B3A38D;    /* Placeholders, disabled text */
+  --color-text-on-primary: #FFFFFF;/* Text over primary color */
+  --color-text-on-dark: #FFFFFF;   /* Text over dark panels */
+
+  /* Borders & Dividers */
+   --color-border-main: #E8DCC6;    /* Card & input borders */
+  --color-border-subtle: #F2E9D9;  /* Light section dividers */
+  --color-border-hover: #D9C7A6;   /* Hover state for borders */
+  --color-border-focus: #A9743A;   /* Focus outline rings */
+
+  /* System & Status Feedback */
+ --color-success: #10B981;
+  --color-success-light: #ECFDF5;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FFFBEB;
+  --color-error: #EF4444;
+  --color-error-light: #FEF2F2;
+  --color-info: #3B82F6;
+  --color-info-light: #EFF6FF;
+
+  /* ------------------------------------------------------------------------
+     3. SPACING & RADIUS SCALE
+     ------------------------------------------------------------------------ */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-btn: 10px;
+  --radius-card: 16px;
+  --radius-modal: 24px;
+  --radius-full: 9999px;
+
+  /* ------------------------------------------------------------------------
+     4. BOX SHADOWS
+     ------------------------------------------------------------------------ */
+ --shadow-xs: 0 1px 2px 0 rgba(28, 23, 18, 0.05);
+  --shadow-sm: 0 2px 4px 0 rgba(28, 23, 18, 0.06);
+  --shadow-card: 0 4px 16px -2px rgba(28, 23, 18, 0.08);
+  --shadow-hover: 0 12px 28px -4px rgba(28, 23, 18, 0.12);
+  --shadow-modal: 0 20px 40px -8px rgba(28, 23, 18, 0.20);
+  --shadow-primary: 0 4px 14px 0 rgba(169, 116, 58, 0.35);
+
+  /* ------------------------------------------------------------------------
+     5. TRANSITIONS
+     ------------------------------------------------------------------------ */
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   REUSABLE UTILITIES (SHORTCUT CLASSES)
+   ========================================================================== */
+
+@utility btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-btn);
+  box-shadow: var(--shadow-primary);
+  transition: all 200ms var(--ease-smooth);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@utility input-field {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  padding: 0.75rem 1rem;
+  background-color: var(--color-subtle);
+  border: 1px solid var(--color-border-main);
+  border-radius: var(--radius-btn);
+  color: var(--color-text-main);
+  outline: none;
+  transition: all 200ms var(--ease-smooth);
+
+  &::placeholder {
+    color: var(--color-text-subtle);
+  }
+
+  &:focus {
+    background-color: var(--color-surface);
+    border-color: var(--color-border-focus);
+    box-shadow: 0 0 0 4px rgba(255, 56, 92, 0.1);
+  }
+}
+
+/* ==========================================================================
+   GLOBAL RESET DEFAULTS
+   ========================================================================== */
+
+html, body {
+  background-color: var(--color-app-bg);
+  color: var(--color-text-main);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
