@@ -2,11 +2,11 @@ import { motion } from "framer-motion";
 import { FiPlus } from "react-icons/fi";
 import { useNavigate } from "react-router";
 
-import ShopEmptyState from "./ShopEmptyState";
-import ShopCard from "./ShopCard";
+import ShopSkeleton from "../components/ShopSkeleton"
+import ShopCard from "../components/ShopCard"
 import useShopStore from "../../../../store/shop.store";
 import useGetShops from "../hooks/useGetShops";
-import ShopSkeleton from "./ShopSkeleton";
+import ShopEmptyState from "../components/ShopEmptyState"
 
 // TODO: replace with real data from your shop store / API
 const mockShops = [
@@ -114,7 +114,7 @@ const OwnerAllShops = () => {
                     )
 
             ) : (
-                <ShopEmptyState />
+                < ShopEmptyState/>
             )}
         </div>
 

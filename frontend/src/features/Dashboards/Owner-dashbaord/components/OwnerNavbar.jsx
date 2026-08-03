@@ -12,28 +12,32 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router";
 import ProfileMenu from "./ProfileMenu";
+import useShopStore from "../../../../store/shop.store";
 
 
-// TODO: replace with real data from your shop store / API
-const myShops = [
-    { id: "1", name: "Coffee House", emoji: "☕" },
-    { id: "2", name: "Pizza Palace", emoji: "🍕" },
-    { id: "3", name: "Burger Express", emoji: "🍔" },
-    { id: "4", name: "Noodle Point", emoji: "🍜" },
-];
+// // TODO: replace with real data from your shop store / API
+// const myShops = [
+//     { id: "1", name: "Coffee House", emoji: "☕" },
+//     { id: "2", name: "Pizza Palace", emoji: "🍕" },
+//     { id: "3", name: "Burger Express", emoji: "🍔" },
+//     { id: "4", name: "Noodle Point", emoji: "🍜" },
+// ];
 
 const OwnerNavbar = () => {
-
+ 
     const [mobileOpen, setMobileOpen] = useState(false);
+
+    const {shops}  = useShopStore();
 
     const [showProfile, setShowProfile] = useState(false);
 
     const [shopMenuOpen, setShopMenuOpen] = useState(false);
 
     const [shopSearch, setShopSearch] = useState("");
-    const [activeShop, setActiveShop] = useState(myShops[0]);
+    const [activeShop, setActiveShop] = useState(shops[0]);
 
     const navigate = useNavigate();
+
     const shopMenuRef = useRef(null);
 
     useEffect(() => {
@@ -54,28 +58,28 @@ const OwnerNavbar = () => {
         return () => document.removeEventListener("mousedown", handleClick);
     }, []);
 
-    const filteredShops = myShops.filter((s) =>
-        s.name.toLowerCase().includes(shopSearch.toLowerCase())
+    const filteredShops = shops?.filter((s) =>
+        s.shopName?.toLowerCase().includes(shopSearch.toLowerCase())
     );
 
     const handleSelectShop = (shop) => {
         setActiveShop(shop);
         setShopMenuOpen(false);
         setShopSearch("");
-        // TODO: navigate(`/owner/shops/${shop.id}`)
+        navigate(`/owner/shops/${shop.id}`)
     };
 
     return (
         <>
-          
-           
+
+
             <header
                 className="sticky left-0  top-0 w-full  pt-4  px-4  z-50 overflow-visible "
             >
                 <motion.div className="mx-auto max-w-7xl w-[94%]"
-                 initial={{ transform: "translateY(-40px)", opacity: 0 }}
-                animate={{ transform: "translateY(0px)", opacity: 1 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
+                    initial={{ transform: "translateY(-40px)", opacity: 0 }}
+                    animate={{ transform: "translateY(0px)", opacity: 1 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                     <nav className="flex  select-none h-20 max-sm:h-16 rounded-full bg-white/85 shadow-[0_20px_60px_rgba(31,26,18,0.12)] ring-1 ring-[#1F1A12]/6 backdrop-blur-2xl items-center justify-between gap-4 px-4 lg:px-8">
                         {/* Brand */}
@@ -169,15 +173,15 @@ const OwnerNavbar = () => {
                                                             whileHover={{ x: 3 }}
                                                             onClick={() => handleSelectShop(shop)}
                                                             className={`group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${activeShop?.id === shop.id
-                                                                    ? "bg-[#B8823B]/10"
-                                                                    : "hover:bg-[#F7F1E6]"
+                                                                ? "bg-[#B8823B]/10"
+                                                                : "hover:bg-[#F7F1E6]"
                                                                 }`}
                                                         >
                                                             <span className="text-xl leading-none">
-                                                                {shop.emoji}
+                                                                {shop?.emoji}
                                                             </span>
                                                             <span className="flex-1 truncate text-sm font-medium text-[#231C12]">
-                                                                {shop.name}
+                                                                {shop.shopName}
                                                             </span>
                                                             <FiArrowRight
                                                                 className="text-[#B8823B] opacity-0 transition group-hover:opacity-100"
@@ -237,7 +241,7 @@ const OwnerNavbar = () => {
 
                                 {showProfile && (
                                     <div className="absolute rounded-lg shadow-2xl w-auto h-20 -bottom-26 -left-60">
-                                        <ProfileMenu/>
+                                        <ProfileMenu />
                                     </div>
                                 )}
                             </div>
@@ -252,7 +256,7 @@ const OwnerNavbar = () => {
                     </nav>
                 </motion.div>
             </header>
-         
+
 
             <AnimatePresence>
                 {mobileOpen && (
@@ -372,8 +376,8 @@ const OwnerNavbar = () => {
                                                                         handleSelectShop(shop)
                                                                     }
                                                                     className={`flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${activeShop?.id === shop.id
-                                                                            ? "bg-[#B8823B]/10"
-                                                                            : "hover:bg-[#F7F1E6]"
+                                                                        ? "bg-[#B8823B]/10"
+                                                                        : "hover:bg-[#F7F1E6]"
                                                                         }`}
                                                                 >
                                                                     <span className="text-lg leading-none">

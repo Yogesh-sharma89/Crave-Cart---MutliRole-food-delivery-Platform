@@ -1,12 +1,23 @@
 import { motion } from "framer-motion";
 import { FiMapPin, FiHome, FiGlobe, FiHash, FiExternalLink, FiEdit2 } from "react-icons/fi";
 import { useNavigate } from "react-router";
+import useShopStore from "../../../../store/shop.store";
 
 const ShopCard = ({ shop, index = 0 }) => {
 
     const navigate = useNavigate();
 
-    const isActive = shop.status === "active";
+    const isActive = !shop.isDeleted === "active";
+
+    const {setCurrentShop,currentShop} = useShopStore();
+    
+
+   const handleEdit = ()=>{
+      //set current shop to shop and shopId to id 
+      console.log("Shop  in shop card : ",shop)
+      setCurrentShop(shop);
+      navigate(`/owner/shops/${shop._id}/edit`)
+   }
 
     return (
         <motion.div
@@ -14,7 +25,7 @@ const ShopCard = ({ shop, index = 0 }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: index * 0.08, ease: "easeOut" }}
             whileHover={{ y: -6 }}
-            className="group overflow-hidden rounded-3xl bg-white/85 shadow-[0_12px_40px_rgba(31,26,18,0.10)] ring-1 ring-[#1F1A12]/6 backdrop-blur-2xl transition-shadow duration-300 hover:shadow-[0_24px_60px_rgba(31,26,18,0.18)]"
+            className="group cursor-pointer overflow-hidden rounded-3xl bg-white/85 shadow-[0_12px_40px_rgba(31,26,18,0.10)] ring-1 ring-[#1F1A12]/6 backdrop-blur-2xl transition-shadow duration-300 hover:shadow-[0_24px_60px_rgba(31,26,18,0.18)]"
         >
             {/* Image with gradient overlay */}
             <div className="relative h-48 w-full overflow-hidden sm:h-52">
@@ -55,7 +66,7 @@ const ShopCard = ({ shop, index = 0 }) => {
                 <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
                     <h3 className="flex items-center gap-2 text-lg font-bold text-white drop-shadow-sm sm:text-xl">
                         <span className="text-xl">{shop.emoji}</span>
-                        <span className="truncate">{shop.name}</span>
+                        <span className="truncate">{shop.shopName}</span>
                     </h3>
                 </div>
             </div>
@@ -107,7 +118,7 @@ const ShopCard = ({ shop, index = 0 }) => {
                 <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => navigate(`/owner/shops/${shop._id}/edit`)}
+                    onClick={handleEdit}
                     className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-[#1F1A12]/12 bg-[#F7F1E6] px-4 py-2.5 text-sm font-semibold text-[#231C12] transition hover:border-[#B8823B]/50 hover:bg-[#B8823B]/10"
                 >
                     <FiEdit2 size={15} />
