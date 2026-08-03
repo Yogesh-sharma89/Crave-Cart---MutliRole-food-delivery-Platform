@@ -10,17 +10,12 @@ import { toast } from "sonner"
 
 export default function CompleteProfile() {
 
-    const { isProfilePending, user, completeProfile, error } = useAuthStore();
+    const {  user, error,isProfilePending,completeProfile } = useAuthStore();
 
     const navigate = useNavigate();
 
     const { handleSubmit, reset, control, formState: { errors, touchedFields } } = useForm({ mode: "onChange" });
 
-    if (user?.phone) {
-        return (
-            <Navigate to={'/user'} replace />
-        )
-    }
 
     const onSubmit = async (data) => {
         const { phone } = data;

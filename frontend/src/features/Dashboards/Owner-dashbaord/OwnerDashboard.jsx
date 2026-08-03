@@ -1,7 +1,6 @@
 import React from 'react'
-
-import OwnerAllShops from './components/OwnerAllShops'
 import OwnerNavbar from './components/OwnerNavbar'
+import OwnerAllShops from './pages/OwnerAllShops'
 
 const OwnerDashboard = () => {
   return (

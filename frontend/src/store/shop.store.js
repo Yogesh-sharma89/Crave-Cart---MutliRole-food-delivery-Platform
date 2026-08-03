@@ -3,6 +3,9 @@ import api from "../utils/api";
 import { getErrorMessage } from "../utils/getErrorMessage";
 import { createShopApi } from "../features/Dashboards/Owner-dashbaord/api/createShopApi";
 import { getAllShops } from "../features/Dashboards/Owner-dashbaord/api/getAllShop";
+import { editShop } from "../features/Dashboards/Owner-dashbaord/api/editShop";
+import deleteShop from "../features/Dashboards/Owner-dashbaord/api/deleteShop";
+import { toast } from 'sonner';
 
 const useShopStore = create((set) => ({
 
@@ -32,7 +35,9 @@ const useShopStore = create((set) => ({
             
             const data = await createShopApi(shopData);
 
-            set({shops:[...shops,data?.shop]})
+           set((state)=>({
+            shops:[...state.shops,data.shop]
+           }))
 
         } catch (err) {
             const message = getErrorMessage(err);
@@ -56,6 +61,41 @@ const useShopStore = create((set) => ({
             throw new Error(message); 
         }finally{
             set({isLoading:false})
+        }
+    },
+
+    updateShop: async(shopId , shopData)=>{
+        console.log("Shop id in shop store")
+        set({isUpdating:true,error:null})
+
+        try{
+            const updatedData = await editShop(shopId,shopData);
+            
+            set((state)=>({
+                shops:[...state.shops,updatedData.shop]
+            }))
+
+        }catch(err){
+            const message = getErrorMessage(err);
+            set({error:message})
+            throw new Error(message); 
+        }finally{
+            set({isUpdating:false})
+        }
+    },
+
+    deleteShop:async(shopId)=>{
+        if(!shopId){
+          toast.error("Please select a shop before deleting")
+          return;
+        }
+        set({isDeleting:true,error:null})
+        try{
+
+            const res = await deleteShop(shopId);
+
+        }catch(err){
+
         }
     }
 

@@ -15,6 +15,7 @@ import ExpiredLinkPage from '../page/ExpiredLinkPage'
 import useAuth from '../hooks/useAuth'
 import { toast } from 'sonner'
 
+
 const LogingPage = lazy(() => import("../page/LoginPage"));
 const SignupPage = lazy(() => import("../page/SignupPage"));
 const CompleteProfile = lazy(() => import("../page/CompleteProfile"));
@@ -23,11 +24,11 @@ const ResetPassword = lazy(() => import("../page/ResetPassword"));
 const NotFoundPage = lazy(() => import("../page/NotFoundPage"));
 
 const OwnerDashboard = lazy(() => import("../features/Dashboards/Owner-dashbaord/OwnerDashboard"));
-const OwnerAllShops = lazy(() => import("../features/Dashboards/Owner-dashbaord/components/OwnerAllShops"));
-const CreateShop = lazy(() => import("../features/Dashboards/Owner-dashbaord/components/CreateShop"));
+const OwnerAllShops = lazy(() => import("../features/Dashboards/Owner-dashbaord/pages/OwnerAllShops"));
+const CreateShop = lazy(() => import("../features/Dashboards/Owner-dashbaord/pages/CreateShop"));
 const DeliveryBoyDashboard = lazy(() => import("../features/Dashboards/DeliveryBoyDashboard"));
 const UserDashboard = lazy(() => import("../features/Dashboards/UserDashboard"));
-
+const EditShop = lazy(() => import("../features/Dashboards/Owner-dashbaord/pages/EditShop"))
 
 const router = createBrowserRouter([
 
@@ -67,16 +68,16 @@ const router = createBrowserRouter([
                         }
                         console.log(params.token);
 
-                        const {isTokenValid,message} = await useAuthStore.getState().checkToken(params.token)
+                        const { isTokenValid, message } = await useAuthStore.getState().checkToken(params.token)
 
-                        console.log("token valid",isTokenValid)
+                        console.log("token valid", isTokenValid)
                         console.log(message);
 
                         if (!isTokenValid) {
                             return redirect('/expire-link-page?reason=invalid_token');
                         }
 
-                        {message && toast(message)}
+                        { message && toast(message) }
 
                         return { isTokenValid }
                     } catch (err) {
@@ -100,12 +101,7 @@ const router = createBrowserRouter([
                 element: <Navigate to={'/user'} replace />
             },
 
-            {
-                path: "complete-profile",
-                element: useAuthStore.getState().isProfilePending ? <Suspense fallback={<FullScreenLoader />}>
-                    <CompleteProfile />
-                </Suspense> : <Navigate to={'/user'} replace />
-            },
+
             {
                 path: "owner",
                 element: <RoleRoute allowedRoles={["owner"]} />,
@@ -127,6 +123,12 @@ const router = createBrowserRouter([
                             path: "shops/new",
                             element: <Suspense fallback={<FullScreenLoader />}>
                                 <CreateShop />
+                            </Suspense>
+                        },
+                        {
+                            path: "shops/:shopId/edit",
+                            element: <Suspense fallback={<FullScreenLoader />}>
+                                <EditShop />
                             </Suspense>
                         }
                     ]
@@ -158,6 +160,16 @@ const router = createBrowserRouter([
         ]
 
     },
+    {
+
+        path: "/complete-profile",
+        element: <Suspense fallback={<FullScreenLoader />}>
+            <CompleteProfile />
+        </Suspense >
+
+
+    }
+    ,
     {
         path: "*",
         element: <NotFoundPage />

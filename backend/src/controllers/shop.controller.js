@@ -49,6 +49,14 @@ export const createShop = asyncHandler(async (req, res) => {
 export const UpdateShop = asyncHandler(async (req, res) => {
 
     const { shopId } = req.params;
+
+    if(!shopId){
+        return res.status(400).json({
+            success:false,
+            message:"Invalid request"
+        })
+    }
+
     const userId = req.userId;
     const file = req.file;
     const { shopName, city, state, address, pincode, country } = req.body;
@@ -59,7 +67,7 @@ export const UpdateShop = asyncHandler(async (req, res) => {
         return res.status(404).json({ success: false, message: "Shop  not found." });
     }
 
-    if (shop._id.toString() !== userId.toString()) {
+    if (shop.owner.toString() !== userId.toString()) {
         return res.status(403).json({
             success: false,
             message: "Access Denied: You do not have permission to modify this shop."
