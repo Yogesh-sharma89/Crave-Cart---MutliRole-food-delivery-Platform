@@ -1,19 +1,22 @@
-import React, { lazy, Suspense } from 'react'
-import { createBrowserRouter, Navigate, redirect, RouterProvider } from 'react-router'
+import { lazy, Suspense } from 'react'
+import { createBrowserRouter, redirect, RouterProvider } from 'react-router'
 
 import ProtectedRoute from './protectedRoute'
 
 import PublicRoute from './PublicRoute'
 
-import useAuthStore from '../store/auth.store'
 
 import FullScreenLoader from '../features/auth/components/Loader'
 
 import RoleRoute from './RoleRoute'
 import CraveCartErrorPage from '../page/CraveCartErrorPage'
 import ExpiredLinkPage from '../page/ExpiredLinkPage'
-import useAuth from '../hooks/useAuth'
+
 import { toast } from 'sonner'
+import ShopDetailPage from '../features/Dashboards/Owner-dashbaord/pages/Shop-Detail-Page/ShopDetailPage'
+import RolbasedRoute from './RolbasedRoute'
+import { queryClient } from '../provider/QueryProvider'
+import CheckResetTokenApi from '../features/auth/api/CheckResetToken'
 
 
 const LogingPage = lazy(() => import("../page/LoginPage"));
@@ -27,8 +30,13 @@ const OwnerDashboard = lazy(() => import("../features/Dashboards/Owner-dashbaord
 const OwnerAllShops = lazy(() => import("../features/Dashboards/Owner-dashbaord/pages/OwnerAllShops"));
 const CreateShop = lazy(() => import("../features/Dashboards/Owner-dashbaord/pages/CreateShop"));
 const DeliveryBoyDashboard = lazy(() => import("../features/Dashboards/DeliveryBoyDashboard"));
-const UserDashboard = lazy(() => import("../features/Dashboards/UserDashboard"));
+const UserDashboard = lazy(() => import("../features/Dashboards/User-dashboard/ui/pages/UserDashboard"));
 const EditShop = lazy(() => import("../features/Dashboards/Owner-dashbaord/pages/EditShop"))
+
+//profile 
+const ProfilePage = lazy(() => import("../features/profile/page/ProfilePage"));
+const ChangePasswordPage = lazy(() => import("../features/profile/page/ChangePassword"))
+const AccountRecoveryPage = lazy(() => import("../features/recover-account/ui/pages/AccountRecovery"));
 
 const router = createBrowserRouter([
 
@@ -63,23 +71,25 @@ const router = createBrowserRouter([
                 loader: async ({ params }) => {
                     try {
 
-                        if (!params.token) {
+                        const token = params.token?.trim();
+
+                        if (!token) {
                             return redirect("/expire-link-page?reason=invalid_token")
                         }
-                        console.log(params.token);
 
-                        const { isTokenValid, message } = await useAuthStore.getState().checkToken(params.token)
+                        const data = await queryClient.ensureQueryData({
+                            queryKey: ['reset-token', token],
+                            queryFn: () => CheckResetTokenApi(token),
+                            staleTime: 5 * 60 * 1000
+                        })
 
-                        console.log("token valid", isTokenValid)
-                        console.log(message);
-
-                        if (!isTokenValid) {
-                            return redirect('/expire-link-page?reason=invalid_token');
+                        if (!data || !data.isTokenValid) {
+                            return redirect("/expire-link-page?reason=invalid_token");
                         }
 
-                        { message && toast(message) }
+                        if (data.message) toast.success(data.message);
 
-                        return { isTokenValid }
+                        return { token }
                     } catch (err) {
                         return redirect("/expire-link-page?reason=loader_error")
                     }
@@ -98,9 +108,8 @@ const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <Navigate to={'/user'} replace />
+                element: <RolbasedRoute />
             },
-
 
             {
                 path: "owner",
@@ -130,12 +139,18 @@ const router = createBrowserRouter([
                             element: <Suspense fallback={<FullScreenLoader />}>
                                 <EditShop />
                             </Suspense>
+                        },
+                        {
+                            path: "shops/:shopId",
+                            element: <Suspense fallback={<FullScreenLoader />}>
+                                <ShopDetailPage />
+                            </Suspense>
                         }
                     ]
             },
             {
                 path: "delivery-boy",
-                element: <RoleRoute allowedRoles={["delivery-boy"]} />,
+                element: <RoleRoute allowedRoles={["deliveryBoy"]} />,
                 children: [
                     {
                         index: true,
@@ -156,18 +171,35 @@ const router = createBrowserRouter([
                         </Suspense>
                     }
                 ]
+            },
+            {
+                path: "profile",
+                children: [
+                    {
+                        index: true,
+                        element: <Suspense fallback={<FullScreenLoader />}>
+                            <ProfilePage />
+                        </Suspense>
+                    },
+                    {
+                        path: "change-password",
+                        element: <Suspense fallback={<FullScreenLoader />}>
+                            <ChangePasswordPage />
+                        </Suspense>
+                    }
+                ]
+            },
+            {
+
             }
         ]
 
     },
     {
-
         path: "/complete-profile",
         element: <Suspense fallback={<FullScreenLoader />}>
             <CompleteProfile />
         </Suspense >
-
-
     }
     ,
     {
@@ -178,6 +210,13 @@ const router = createBrowserRouter([
         path: "/expire-link-page",
         element: <Suspense fallback={<FullScreenLoader />}>
             <ExpiredLinkPage />
+        </Suspense>
+    },
+    {
+        path: "/recover-account",
+        errorElement: <CraveCartErrorPage />,
+        element: <Suspense fallback={<FullScreenLoader />}>
+            <AccountRecoveryPage />
         </Suspense>
     }
 ])

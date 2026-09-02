@@ -1,17 +1,18 @@
-import React, { useEffect } from 'react'
-import useShopStore from '../../../../store/shop.store'
+
+
+import {useQuery} from "@tanstack/react-query";
+import { getAllShops } from '../api/getAllShop';
 
 const useGetShops = () => {
 
-    const {getShops,isLoading,shops} = useShopStore();
 
-    useEffect(()=>{
-      getShops()
-    },[])
+   return useQuery({
+        queryKey:['getAllShops'],
+        queryFn:getAllShops,
+        retry:2,
+        staleTime:Infinity
+    }) 
 
-    return {
-        isLoading,shops
-    }
   
 }
 

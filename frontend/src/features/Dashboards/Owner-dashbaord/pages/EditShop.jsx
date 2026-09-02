@@ -1,14 +1,16 @@
-import React from 'react'
+import FullScreenLoader from "../../../../features/auth/components/Loader"
 import ShopForm from '../components/ShopForm'
 import useUpdateShop from '../hooks/useUpdateShop';
 import { motion } from "framer-motion";
-import { Navigate } from 'react-router';
+
 
 const EditShop = () => {
 
-  const { onSubmit, form, isUpdating, currentShop } = useUpdateShop();
+  const { onSubmit, form, isUpdating, currentShop,isShopLoading } = useUpdateShop();
 
-  console.log("edit shop :", currentShop)
+  if(isShopLoading){
+    return <FullScreenLoader text="Loading your shop..."/>
+  }
 
   return (
     <div className="min-h-screen w-full bg-[#FBF7F0] px-4 py-10 sm:py-14">
@@ -25,11 +27,17 @@ const EditShop = () => {
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             className="mx-auto mb-4 flex size-16 items-center justify-center rounded-3xl bg-linear-to-br from-[#B8823B] to-[#96652A] text-3xl shadow-lg shadow-[#B8823B]/30 sm:size-20 sm:text-4xl"
           >
-            <img
-              src={currentShop?.shopImage}
-              alt={currentShop?.shopName}
-              className='w-full h-full rounded-xl object-cover'
-            />
+           {currentShop?.shopImage ? (
+              <img
+                src={currentShop.shopImage}
+                alt={currentShop.shopName || "Shop Preview"}
+                className='w-full h-full object-cover'
+              />
+            ) : (
+              <span className="text-white text-xl sm:text-2xl font-bold">
+                {currentShop?.shopName?.charAt(0).toUpperCase() || "S"}
+              </span>
+            )}
           </motion.div>
 
           <h1 className="text-2xl font-bold text-[#231C12] sm:text-3xl">

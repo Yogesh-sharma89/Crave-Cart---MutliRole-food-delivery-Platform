@@ -1,33 +1,28 @@
-import React, { useEffect } from 'react'
 
 import AppProvider from './AppProvider.jsx'
 import AppRoutes from './Routes/AppRoutes.jsx'
-import useAuthStore from './store/auth.store.js';
-import useNetworkStore from './store/network.store.js';
 import FullScreenLoader from './features/auth/components/Loader.jsx';
+import useAuthUser from './features/auth/hooks/useAuthUser.jsx';
 
-const App = () => {
+const AppContent = () => {
+  const { isLoading } = useAuthUser();
 
-  const { isCheckingAuth, checkAuth } = useAuthStore();
-  const { isOnline } = useNetworkStore();
-
-  useEffect(() => {
-    checkAuth();
-  }, [])
-
-
-  if (isCheckingAuth && isOnline) {
+  if (isLoading) {
     return (
       <FullScreenLoader />
     )
   }
 
+  return <AppRoutes/>
+}
+
+const App = () => {
 
   return (
     <>
 
       <AppProvider>
-        <AppRoutes />
+        <AppContent />
       </AppProvider>
     </>
 

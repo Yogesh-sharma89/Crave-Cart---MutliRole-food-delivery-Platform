@@ -15,6 +15,7 @@ const categorySchema = new Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      index:true
       // e.g. "south-indian" — used in URLs, filters, and API queries
     },
     icon: {

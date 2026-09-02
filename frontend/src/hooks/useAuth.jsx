@@ -1,14 +1,16 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
-import useAuthStore from '../store/auth.store';
 import { toast } from 'sonner';
+import useAuthMutation from "../features/auth/hooks/useAuth"
 
 const useAuth = () => {
 
-    const { handleSubmit, control, watch, register, reset, setValue, formState: { errors, touchedFields } } = useForm({ mode: "onChange", reValidateMode: "onChange" ,defaultValues:{
-        role:"user"
-    }});
+    const { handleSubmit, control, watch, register, reset, setValue, formState: { errors, touchedFields } } = useForm({
+        mode: "onChange", reValidateMode: "onChange", defaultValues: {
+            role: "user"
+        }
+    });
 
     const [showPassword, setShowPassword] = useState(false)
 
@@ -16,52 +18,67 @@ const useAuth = () => {
 
     const navigate = useNavigate();
 
-    const { loading, error, login,signup } = useAuthStore();
+    const { Signup, Login, signupPending, loginPending } = useAuthMutation();
 
     const LoginFormSubmit = async (data) => {
-        const { email, password } = data;
+
         try {
 
-            await toast.promise(login(email, password), {
+            await toast.promise(Login({ data }), {
                 loading: "Logging you in...",
                 success: () => {
                     reset();
-                    navigate('/user', { replace: true });
+                    navigate('/', { replace: true });
                     return "Login successfull"
                 },
-                error: (err) => err.message
-            })
+                error: (err) => {
+                    if (err.response?.status === 403 && err.response?.data?.status === "scheduled_for_deletion") {
+                        navigate("/recover-account");
+                        return (err.response.data.message || "Account is frozen.")
+                    }
+
+                    return err.response.data.message || "Failed to login"
+                }
+            }).unwrap()
+
+
 
         } catch (err) {
-            console.log(err.message);
-            toast(err.message);
+            console.error("Login failed:", err);
         }
     }
 
     const SignupFormSubmit = async (data) => {
-
-        const { fullname, email, password, phone,role } = data;
         try {
-    
-          await toast.promise(signup(fullname, email, password, phone, role), {
-            loading: "Creating your account...",
-            success: () => {
-              reset();
-              navigate('/user', { replace: true });
-              return "Account created successfully"
-            },
-            error: (err) => error || err.message
-          })
-    
-        } catch (err) {
-          console.log(err.message);
-        }
-      }
 
+            await toast.promise(Signup({ data }), {
+                loading: "Creating your account...",
+                success: () => {
+                    reset();
+                    navigate(`/`, { replace: true });
+                    return "Account created successfully"
+                },
+                error: (err) => {
+
+                    if (err.response?.status === 403 && err.response?.data?.status === "scheduled_for_deletion") {
+                         navigate("/recover-account");
+                        return err.response.data.message || "Account is frozen."
+                    }
+
+                   return err.response?.data?.message || "Failed to register" 
+                }
+            }).unwrap()
+
+
+
+        } catch (err) {
+            console.log(err.message);
+        }
+    }
 
     return {
-        handleSubmit,showPassword,setShowPassword,role,setValue,register,errors,touchedFields,
-        loading,error,LoginFormSubmit,navigate,SignupFormSubmit,control
+        handleSubmit, showPassword, setShowPassword, role, setValue, register, errors, touchedFields,
+        signupPending, loginPending, LoginFormSubmit, navigate, SignupFormSubmit, control
     }
 }
 

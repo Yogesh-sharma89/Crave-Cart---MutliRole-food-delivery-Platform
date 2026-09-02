@@ -1,15 +1,12 @@
-import React, { useState } from "react";
+
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { Controller, useForm } from "react-hook-form"
+import { Controller} from "react-hook-form"
 import { v4 as uuidv4 } from 'uuid';
 import { PhoneInput, defaultCountries } from 'react-international-phone';
 import 'react-international-phone/style.css';
 import { ValidatePhone } from "../utils/validatePhone";
 import SignInButton from "../features/auth/components/SignInButton";
 import GoogleButton from "../features/auth/components/GoogleButton";
-import useAuthStore from "../store/auth.store.js";
-import { toast } from "sonner";
-import { useNavigate } from "react-router";
 import Seperator from "../components/Seperator.jsx";
 import useAuth from "../hooks/useAuth.jsx";
 
@@ -17,8 +14,8 @@ const roleArr = ["user", "owner", "deliveryBoy"]
 
 const SignupPage = () => {
 
-  const { handleSubmit, showPassword, setShowPassword, role, setValue, register, errors, touchedFields,
-    loading, error, navigate, SignupFormSubmit, control } = useAuth();
+  const { handleSubmit, showPassword, setShowPassword, role, setValue, register, errors,
+    signupPending, error, navigate, SignupFormSubmit, control } = useAuth();
 
 
   return (
@@ -41,7 +38,7 @@ const SignupPage = () => {
               Fullname
             </label>
             <input
-              disabled={loading}
+              disabled={signupPending}
               {
               ...register("fullname", {
                 required: "Full name is required",
@@ -73,7 +70,7 @@ const SignupPage = () => {
               Email
             </label>
             <input
-              disabled={loading}
+              disabled={signupPending}
               placeholder="Enter your email.."
               type="email"
               required
@@ -105,7 +102,7 @@ const SignupPage = () => {
             <div className="w-full relative group">
 
               <input
-                disabled={loading}
+                disabled={signupPending}
                 placeholder="Enter your password.."
                 type={showPassword ? "text" : "password"}
                 minLength={8}
@@ -162,7 +159,7 @@ const SignupPage = () => {
               }}
               render={({ field }) => (
                 <PhoneInput
-                  disabled={loading}
+                  disabled={signupPending}
                   defaultCountry="in"
                   value={field.value}
                   onChange={field.onChange}
@@ -176,7 +173,7 @@ const SignupPage = () => {
               )}
             />
 
-            {touchedFields.phone && errors.phone && (
+            {errors.phone && (
               <p className="text-red-500 text-sm">
                 {errors.phone.message}
               </p>
@@ -202,7 +199,7 @@ const SignupPage = () => {
               {
                 roleArr.map((r) => {
                   const activeRole = r === role;
-                  return <button disabled={loading} key={uuidv4()} onClick={() => setValue("role",r)} type="button" className={`flex-1 px-3 cursor-pointer select-none text-sm font-medium py-2 border border-gray-300 rounded-xl text-center transition-colors duration-200
+                  return <button disabled={signupPending} key={uuidv4()} onClick={() => setValue("role",r)} type="button" className={`flex-1 px-3 cursor-pointer select-none text-sm font-medium py-2 border border-gray-300 rounded-xl text-center transition-colors duration-200
                   ${activeRole && 'bg-primary text-white hover:bg-primary-hover'}
                   `}>
                     {r}
@@ -217,7 +214,7 @@ const SignupPage = () => {
 
 
           <div className="w-full">
-            <SignInButton title={"Sign up"} />
+            <SignInButton title={"Sign up"} loading={signupPending}/>
           </div>
 
           <Seperator />

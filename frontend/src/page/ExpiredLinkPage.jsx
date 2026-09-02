@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { Clock3, RefreshCcw, ArrowLeft } from "lucide-react";
-import { useEffect } from "react";
-import { Link, Navigate, useLocation, useSearchParams } from "react-router";
+import { Link, Navigate,  useSearchParams } from "react-router";
 
 export default function ExpiredLinkPage() {
 

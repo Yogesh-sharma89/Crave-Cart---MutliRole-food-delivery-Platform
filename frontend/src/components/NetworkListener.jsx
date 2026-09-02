@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
-import useAuthStore from '../store/auth.store';
+import { useEffect } from 'react'
+import useNetworkStore from '../store/network.store';
 
 const NetworkListener = () => {
 
-  const {isOnline,setOnline,setOffline} = useAuthStore();
+  const {setOnline,setOffline} = useNetworkStore();
 
   useEffect(()=>{
 

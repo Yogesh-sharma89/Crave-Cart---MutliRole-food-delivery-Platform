@@ -1,4 +1,4 @@
-import React from 'react'
+
 import OwnerNavbar from './components/OwnerNavbar'
 import OwnerAllShops from './pages/OwnerAllShops'
 

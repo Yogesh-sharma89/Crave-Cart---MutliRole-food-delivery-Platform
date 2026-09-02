@@ -1,8 +1,8 @@
-import React from 'react'
+
 
 const DeliveryBoyDashboard = () => {
   return (
-    <div>
+    <div className="text-black">
       hey i am delivery dashbaord
     </div>
   )

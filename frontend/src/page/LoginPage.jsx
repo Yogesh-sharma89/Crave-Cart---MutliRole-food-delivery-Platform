@@ -11,7 +11,7 @@ const LoginPage = () => {
 
   const {
     handleSubmit, showPassword, setShowPassword, register, errors,
-    loading, error, LoginFormSubmit, navigate
+    loginPending, LoginFormSubmit, navigate
   } = useAuth();
 
 
@@ -36,7 +36,7 @@ const LoginPage = () => {
               Email
             </label>
             <input
-              disabled={loading}
+              disabled={loginPending}
               placeholder="Enter your email.."
               type="email"
               required
@@ -68,7 +68,7 @@ const LoginPage = () => {
             <div className="w-full relative group">
 
               <input
-                disabled={loading}
+                disabled={loginPending}
                 placeholder="Enter your password.."
                 type={showPassword ? "text" : "password"}
                 minLength={8}
@@ -92,6 +92,7 @@ const LoginPage = () => {
 
               <button
                 type="button"
+                disabled={loginPending}
                 onClick={() => setShowPassword(!showPassword)}
                 className="hover:bg-zinc-200   absolute top-0.5  right-2 rounded-full p-1.5 cursor-pointer">
                 {
@@ -115,7 +116,7 @@ const LoginPage = () => {
           </div>
 
           <div className="w-full">
-            <SignInButton title={"Login"} />
+            <SignInButton title={"Login"} loading={loginPending} />
           </div>
 
           <Seperator />

@@ -1,27 +1,29 @@
-import React from 'react'
+
 import NetworkListener from './components/NetworkListener'
 import useNetworkStore from './store/network.store'
 import NoInternetPage from './page/NoInternetPage';
 import { Toaster } from 'sonner';
-import AppRoutes from './Routes/AppRoutes';
 
 
-const AppProvider = ({children}) => {
-  
-    const {isOnline} = useNetworkStore();
+
+const AppProvider = ({ children }) => {
+
+  const isOnline = useNetworkStore(
+    (state) => state.isOnline
+  );
 
   return (
     <>
 
-      <NetworkListener/>
+      <NetworkListener />
 
       {
-        !isOnline ? 
-       ( <NoInternetPage/>)
-        :
-        (
+        !isOnline ?
+          (<NoInternetPage />)
+          :
+          (
             <>
-            
+
               <Toaster
                 position="top-right"
                 expand={false}
@@ -30,12 +32,12 @@ const AppProvider = ({children}) => {
                 theme="light"
               />
 
-             {children}
-              
-            </> 
-        )
+              {children}
+
+            </>
+          )
       }
-      
+
     </>
   )
 }

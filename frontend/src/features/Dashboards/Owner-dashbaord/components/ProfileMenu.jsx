@@ -4,14 +4,16 @@ import {
     HiOutlineArrowRightOnRectangle,
     HiOutlineShieldCheck,
 } from "react-icons/hi2";
-import useAuthStore from "../../../../store/auth.store";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
+import useLogout from "../../../auth/hooks/useLogout";
+import useAuthUser from "../../../auth/hooks/useAuthUser";
 
 const ProfileMenu = () => {
 
-    const { user, logout } = useAuthStore();
-
+    const {mutateAsync:logout} = useLogout();
+    const {data:user} = useAuthUser();
+    
     const navigate = useNavigate();
 
     const handleLogout = async () => {

@@ -5,7 +5,9 @@ import useLocationStore from "../../../store/location.store";
 
 
 export default function DetectLocationButton() {
+
     const {loading,getCoordinates} = useLocationStore();
+    
   return (
     <motion.button
       whileHover={{ scale: 1.02 }}

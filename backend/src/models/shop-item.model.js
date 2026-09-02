@@ -19,7 +19,8 @@ const shopItemSchema = new Schema({
     shop:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"shop",
-        required:true
+        required:true,
+        index:true
     },
     category:{
         type:mongoose.Schema.Types.ObjectId,
@@ -35,6 +36,19 @@ const shopItemSchema = new Schema({
         type:String,
         enum:["veg","non-veg"],
         required:true
+    },
+    isAvailable: {
+      type: Boolean,
+      default: true,
+    },
+
+    preparationTime: {
+      type: Number,
+      min: 1,
+    },
+    description:{
+        type:String,
+        required:true,
     }
 },{timestamps:true})
 

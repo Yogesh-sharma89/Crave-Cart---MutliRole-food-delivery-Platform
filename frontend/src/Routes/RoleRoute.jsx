@@ -1,19 +1,19 @@
-import React from 'react'
-import useAuthStore from '../store/auth.store'
 import { Navigate, Outlet } from 'react-router';
 import FullScreenLoader from '../features/auth/components/Loader';
+import useAuthUser from '../features/auth/hooks/useAuthUser';
+
 
 const ROLES = {
   user: "/user",
   owner: "/owner",
-  "delivery-boy": "/delivery-boy",
+  deliveryBoy: "/delivery-boy",
 };
 
-const RoleRoute = ({children,allowedRoles}) => {
+const RoleRoute = ({allowedRoles}) => {
 
-    const {user,isCheckingAuth} = useAuthStore();
+    const {isLoading,data:user} = useAuthUser();
 
-    if(isCheckingAuth){
+    if(isLoading){
       return (
         <FullScreenLoader/>
       )
@@ -33,8 +33,7 @@ const RoleRoute = ({children,allowedRoles}) => {
     }
   return (
     <>
-    { children ? children : <Outlet/>}
-      
+     <Outlet/>
     </>
   )
 }

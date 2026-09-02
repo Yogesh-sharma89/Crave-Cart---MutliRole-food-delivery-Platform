@@ -1,23 +1,27 @@
 import express from "express";
-import { checkAuth, checkResetPasswordStatus, CheckResetToken, ForgotPassword, googleAuth, ResetPassword, SignIn, SignOut, Signup, UpdatePhone } from "../controllers/auth.controller.js";
-import { ProtectRoute } from "../middleware/ProtectRoute.js";
+import {  checkAuth, checkResetPasswordStatus, CheckResetToken, ForgotPassword, googleAuth, ResetPassword, SendEmailOtp, SignIn,  Signup, VerifyOtp } from "../controllers/auth.controller.js";
+import { authLimiter, otpLimiter, resetLimiter } from "../middleware/rate.middleware.js";
+
 
 const authRouter = express.Router();
 
-authRouter.post("/signup",Signup);
-authRouter.post("/login",SignIn);
-authRouter.post("/logout",ProtectRoute,SignOut);
-authRouter.get("/check-auth",ProtectRoute,checkAuth);
-authRouter.post("/forgot-password",ForgotPassword);
+authRouter.post("/signup",authLimiter,Signup);
+authRouter.post("/login",authLimiter,SignIn);
 
-authRouter.post("/reset-password",ResetPassword);
+authRouter.get("/check-auth", checkAuth);       
 
-authRouter.post("/check-reset-token",CheckResetToken)
+authRouter.post("/forgot-password",resetLimiter,ForgotPassword);
 
-authRouter.post("/google-auth",googleAuth);
+authRouter.post("/reset-password",resetLimiter,ResetPassword);
 
-authRouter.post("/update-phone",UpdatePhone)
+authRouter.post("/check-reset-token",resetLimiter,CheckResetToken)
+
+authRouter.post("/google-auth",authLimiter,googleAuth);
 
 authRouter.get("/check-reset-status",checkResetPasswordStatus)
+
+//recover accout api 
+authRouter.post("/send-otp",otpLimiter,SendEmailOtp);
+authRouter.post("/verify-otp",otpLimiter,VerifyOtp);
 
 export default authRouter;

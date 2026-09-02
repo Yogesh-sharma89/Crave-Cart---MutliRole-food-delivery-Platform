@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import crypto from "crypto";
 
-const uploadDir = path.resolve("../uploads");
+const uploadDir = path.resolve(import.meta.dirname,"..","uploads");
 
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -23,15 +23,17 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
 
-    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp',"image/avif"];
 
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp','.avif'];
 
     const isMimeValid = allowedMimeTypes.includes(file?.mimetype);
 
     const fileExtension = path.extname(file.originalname).toLowerCase();
 
     const isvalidExtension = allowedExtensions.includes(fileExtension);
+
+    console.log(isvalidExtension);
 
     if (isMimeValid && isvalidExtension) {
         cb(null, true);

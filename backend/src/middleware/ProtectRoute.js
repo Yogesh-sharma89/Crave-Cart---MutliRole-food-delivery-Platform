@@ -1,19 +1,12 @@
-import { verifyToken } from "../utils/token.js";
 
-export const ProtectRoute  = async(req,res,next)=>{
 
-    const token = req.cookies?.token;
+export const ProtectRoute = async (req, res, next) => {
 
-    if (!token) {
+    if (!req.userId) {
         return res.status(401).json({
             success: false,
-            message: "Unauthorized",
+            message: "Unauthorized. Please log in.",
         });
     }
-
-    const payload = verifyToken(token);
-
-    req.userId = payload.userId;
-
     next();
 }
