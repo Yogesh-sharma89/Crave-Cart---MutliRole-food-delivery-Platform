@@ -31,7 +31,6 @@ const useLocationStore = create((set) => ({
                 navigator.geolocation.getCurrentPosition(resolve, reject, highAccuracyOptions)
             })
 
-            console.log(position);
             const { latitude, longitude } = position.coords;
 
             //now get location

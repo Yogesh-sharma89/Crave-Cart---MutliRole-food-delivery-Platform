@@ -1,3 +1,4 @@
+import CategoryModel from "../models/category.model.js";
 import ShopModel from "../models/shop.model.js";
 import { UploadToCloudinary } from "../service/cloudinary.service.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -50,10 +51,10 @@ export const UpdateShop = asyncHandler(async (req, res) => {
 
     const { shopId } = req.params;
 
-    if(!shopId){
+    if (!shopId) {
         return res.status(400).json({
-            success:false,
-            message:"Invalid request"
+            success: false,
+            message: "Invalid request"
         })
     }
 
@@ -61,7 +62,7 @@ export const UpdateShop = asyncHandler(async (req, res) => {
     const file = req.file;
     const { shopName, city, state, address, pincode, country } = req.body;
 
-    const shop = await ShopModel.findOne({_id:shopId,isDeleted:false});
+    const shop = await ShopModel.findOne({ _id: shopId, isDeleted: false });
 
     if (!shop) {
         return res.status(404).json({ success: false, message: "Shop  not found." });
@@ -103,7 +104,7 @@ export const DeleteShop = asyncHandler(async (req, res) => {
     const { shopId } = req.params;
     const userId = req.userId;
 
-    const shop = await ShopModel.findOne({_id:shopId,isDeleted:false});
+    const shop = await ShopModel.findOne({ _id: shopId, isDeleted: false });
 
     if (!shop) {
         return res.status(404).json({ success: false, message: "Shop  not found." });
@@ -116,12 +117,12 @@ export const DeleteShop = asyncHandler(async (req, res) => {
         });
     }
 
-   shop.isDeleted = true;
-   await shop.save();
+    shop.isDeleted = true;
+    await shop.save();
 
-    return res.status(200).json({ 
-        success: true, 
-        message: "Shop  deactivated successfully" ,
+    return res.status(200).json({
+        success: true,
+        message: "Shop  deactivated successfully",
     });
 
 
@@ -129,24 +130,55 @@ export const DeleteShop = asyncHandler(async (req, res) => {
 
 export const GetAllShopByOwner = asyncHandler(async (req, res) => {
 
-   const ownerId = req.userId;
+    const ownerId = req.userId;
 
-   //find by owner by owner Id 
-   const shopsOfOwner = await ShopModel.find({owner:ownerId});
+    //find by owner by owner Id 
+    const shopsOfOwner = await ShopModel.find({ owner: ownerId });
 
-   if(!shopsOfOwner || shopsOfOwner.length===0 ){
-    return res.status(404).json({
-        success:true,
-        message:"No shops found for this owner"
+    return res.status(200).json({
+        message: "Shops get successfully",
+        success: true,
+        shops: shopsOfOwner
     })
-   }
 
-   return res.status(200).json({
-    message:"Shops get successfully",
-    success:true,
-    shops:shopsOfOwner
-   })
+})
 
+export const GetAllCategories = asyncHandler(async (req, res) => {
+
+    const categories = await CategoryModel.find({ isActive: true }).sort({
+        sortOrder: 1,
+    })
+        .select("_id name slug icon type");
+
+    res.status(200).json({
+        success: true,
+        message: "Categories got successfully",
+        categories
+    })
+})
+
+export const GetShopById = asyncHandler(async(req,res)=>{
+
+    const {shopId} = req.params;
+
+    if(!shopId || !shopId.trim()){
+        res.status(400)
+        throw new Error("Invalid request")
+    }
+
+    //find shop 
+    const shop = await ShopModel.findById(shopId);
+
+    if(!shop){
+        res.status(404);
+        throw  new Error("Shop not found!")
+    }
+
+    res.status(200).json({
+        success:true,
+        message:"Shop got successfully",
+        shop
+    })
 })
 
 

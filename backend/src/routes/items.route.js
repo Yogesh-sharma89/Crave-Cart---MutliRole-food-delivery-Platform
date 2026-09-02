@@ -6,7 +6,7 @@ import { upload } from "../middleware/upload.middleware.js";
 
 const itemRouter = express.Router();
 
-itemRouter.use(ProtectRoute,checkOwner);
+itemRouter.use(checkOwner);
 
 itemRouter.post("/:shopId/addItem",upload.single("itemImage"),AddItem)
 itemRouter.put("/update-item/:itemId",upload.single("itemImage"),updateItem)

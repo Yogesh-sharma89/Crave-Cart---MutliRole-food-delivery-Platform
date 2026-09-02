@@ -4,37 +4,40 @@ import { Controller, useForm } from "react-hook-form";
 import { PhoneInput, defaultCountries } from 'react-international-phone';
 import 'react-international-phone/style.css'
 import { ValidatePhone } from "../utils/validatePhone";
-import useAuthStore from "../store/auth.store";
-import { Navigate, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { toast } from "sonner"
+import useAuthUser from "../features/auth/hooks/useAuthUser";
+import useCompleteProfile from "../features/complete-profile/hooks/useCompleteProfile";
+import Role from "../features/auth/ui/components/Role";
 
 export default function CompleteProfile() {
 
-    const {  user, error,isProfilePending,completeProfile } = useAuthStore();
+    const { mutateAsync: completeProfile, isPending } = useCompleteProfile();
+    const { data: user } = useAuthUser();
 
     const navigate = useNavigate();
 
-    const { handleSubmit, reset, control, formState: { errors, touchedFields } } = useForm({ mode: "onChange" });
+    const { handleSubmit, reset,watch, control,setValue, formState: { errors } } = useForm({ mode: "onChange" });
 
+    const role = watch('role');
 
     const onSubmit = async (data) => {
-        const { phone } = data;
+        console.log(data)
+        const { phone, role } = data;
         try {
 
-            await toast.promise(completeProfile(phone, user?.email), {
+            await toast.promise(completeProfile({phone, role}), {
                 loading: "Completing Profile....",
                 success: () => {
                     reset();
                     navigate("/", { replace: true });
                     return "Profile completed successfully"
                 },
-                error: (err) => err.message || error
+                error: (err) => err.message || "failed to complete profile"
             })
 
         } catch (err) {
             console.log("Error in complete profile component submit : ", err.message)
-
-            toast.error(err.message);
         }
     }
 
@@ -115,41 +118,50 @@ export default function CompleteProfile() {
 
                 <div className="mt-10">
 
-                    <label className="mb-3 block font-semibold text-(--color-text-main)">
-                        Phone Number
-                    </label>
+
 
                     <form className="rounded-xl   bg-white p-1" onSubmit={handleSubmit(onSubmit)}>
 
-                        <Controller
-                            name="phone"
-                            control={control}
-                            rules={{
-                                required: "Phone number is required",
-                                validate: ValidatePhone
-                            }}
-                            render={({ field }) => (
-                                <PhoneInput
-                                    disabled={isProfilePending}
-                                    defaultCountry="in"
-                                    value={field.value}
-                                    required
-                                    onChange={field.onChange}
-                                    countries={defaultCountries}
-                                    inputStyle={{
-                                        width: "100%",
-                                        padding: "10px"
-                                    }}
-                                    className="w-full border  rounded-lg px-3 py-1 text-sm  focus:ring-2 focus:ring-orange-600 focus:outline-none focus:border-transparent transition-all duration-150"
-                                />
-                            )}
-                        />
+
+                        <div>
+                            <label className="mb-3 block font-semibold text-(--color-text-main)">
+                                Phone Number
+                            </label>
+                            <Controller
+                                name="phone"
+                                control={control}
+                                rules={{
+                                    required: "Phone number is required",
+                                    validate: ValidatePhone
+                                }}
+                                render={({ field }) => (
+                                    <PhoneInput
+                                        disabled={isPending}
+                                        defaultCountry="in"
+                                        value={field.value}
+                                        required
+                                        onChange={field.onChange}
+                                        countries={defaultCountries}
+                                        inputStyle={{
+                                            width: "100%",
+                                            padding: "10px"
+                                        }}
+                                        className="w-full border  rounded-lg px-3 py-1 text-sm  focus:ring-2 focus:ring-orange-600 focus:outline-none focus:border-transparent transition-all duration-150"
+                                    />
+                                )}
+                            />
+                        </div>
+
 
                         {errors.phone && (
                             <p className="text-red-500 text-sm mt-2">
                                 {errors.phone?.message}
                             </p>
                         )}
+
+
+                        {/* user role  */}
+                        <Role loading={isPending} role={role} setValue={setValue}/>
 
                         {/* Info */}
 

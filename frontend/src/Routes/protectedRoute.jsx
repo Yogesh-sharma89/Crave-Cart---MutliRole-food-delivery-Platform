@@ -1,22 +1,25 @@
-import React from 'react'
-import useAuthStore from '../../../frontend/src/store/auth.store.js'
+
 import {  Navigate, Outlet } from "react-router";
-import FullScreenLoader from '../features/auth/components/Loader.jsx';
+import useAuthUser from "../features/auth/hooks/useAuthUser";
+import FullScreenLoader from "../features/auth/components/Loader";
+
 
 const ProtectedRoute = () => {
-    const {isAuthenticated,isCheckingAuth,user}  = useAuthStore();
+   const {isLoading,data:user} = useAuthUser();
 
-    if(isCheckingAuth){
+    if(isLoading){
         return (
         <FullScreenLoader/>
         )
     }
 
+    const isAuthenticated = Boolean(user);
+
     if(!isAuthenticated){
         return <Navigate to={'/login'} replace/>
     }
 
-    if(!user?.phone && isAuthenticated){
+    if(!user.phone && isAuthenticated){
      return (
       <Navigate to="/complete-profile" replace/>
      )

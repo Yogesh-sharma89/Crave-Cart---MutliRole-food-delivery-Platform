@@ -1,37 +1,29 @@
-import React, { useEffect } from 'react'
+
 import useShopForm from './useShopForm'
-import useShopStore from '../../../../store/shop.store';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
+import useGetShop from './useGetShop';
+import useUpdateShopMutation from './useUpdateShopMutation';
 
 const useUpdateShop = () => {
 
-  const { isUpdating, error, updateShop, currentShopId, currentShop } = useShopStore();
+  const { shopId } = useParams();
 
+  const { data: currentShop, isLoading: isShopLoading } = useGetShop(shopId);
 
-  const currentShopData = currentShop ||
-    (typeof window !== "undefined" && localStorage.getItem("currentShop")
-      ? JSON.parse(localStorage.getItem("currentShop"))
-      : null);
+  const { mutateAsync: updateShop, isPending: isUpdating } = useUpdateShopMutation()
 
-  const shopId = currentShopId || 
-  (typeof window!== "undefined" && localStorage.getItem("shopId")
-   ? localStorage.getItem("shopId") : null
-)
+  const form = useShopForm(currentShop);
 
-console.log(currentShop)
-
-
-  const form = useShopForm(currentShopData);
-
-  const {reset}  = form;
+  const { reset, setError } = form;
 
   const navigate = useNavigate();
 
 
   const onSubmit = async (data) => {
 
-    const { shopName, city, state, address, country, pincode, shopImage } = data;
+    const { shopImage } = data;
+    console.log(data)
 
     if (!shopImage) {
       toast.error("Please upload shop image");
@@ -39,21 +31,24 @@ console.log(currentShop)
     }
     try {
 
-      await toast.promise(updateShop(shopId, data), {
+      await toast.promise(updateShop({ shopId, data }), {
         loading: "Updating your shop",
         success: () => {
           reset();
           navigate("/owner");
-          localStorage.removeItem("currentShop")
           return "Shop updated successfully"
         },
-        error: (err) => err.message || error
+        error: (err) => {
+          const serverMessage = err?.response?.data?.message;
+          const clientMessage = err?.message;
+          return serverMessage || clientMessage || "Failed to update shop";
+        },
       })
 
-
     } catch (err) {
+      useShopForm
       // Surface server-side / network errors inline instead of failing silently
-      form?.setError("root", {
+      setError("root", {
         type: "server",
         message:
           err?.response?.data?.message ||
@@ -62,15 +57,8 @@ console.log(currentShop)
     }
   };
 
-  useEffect(() => {
-    if(currentShop){
-       localStorage.setItem("currentShop", JSON.stringify(currentShop))
-       localStorage.setItem("shopId",currentShopId);
-    }
-  }, [currentShop])
-
   return {
-    onSubmit, form, isUpdating, currentShop
+    onSubmit, form, isUpdating, currentShop, isShopLoading
   }
 }
 

@@ -1,4 +1,4 @@
-import mongoose, { model, Schema } from "mongoose";
+import  { model, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -47,26 +47,38 @@ const userSchema = new Schema({
         }
     },
     avatarUrl:String,
+    avatarId:{
+        type:String,
+        trim:true
+    },
     provider:{
         type:String,
         enum:["local","google"],
         default:"local"
     },
-    firebaseId:String
+    firebaseId:String,
+
+    recoveryOtp:String,
+    recoveryOtpExpireAt:Date,
+    
+    deletedAt:{
+        type:Date,
+        default:null
+    }
 
 },{timestamps:true})
 
 
 userSchema.pre('save',async function(){
-    const user = this;
 
-    if(!user.isModified("password")){
+    if(!this.isModified("password")){
         return 
     }
     try{
 
-       user.password = await bcrypt.hash(user.password,10);
-       
+        const hashPassword = await bcrypt.hash(this.password,10);
+
+       this.password = hashPassword;
 
     }catch(err){
         throw err;

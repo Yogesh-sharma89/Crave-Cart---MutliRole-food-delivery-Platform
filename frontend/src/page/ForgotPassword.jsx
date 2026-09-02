@@ -1,19 +1,15 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { useNavigate } from 'react-router';
 import { MdMarkEmailRead, MdOutlineLockPerson } from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion"
 import { IoArrowForward, IoCheckmarkCircle } from "react-icons/io5";
-import { useForm } from 'react-hook-form';
-import useAuthStore from '../store/auth.store.js';
-import { toast } from "sonner";
 import useForgotPassword from '../hooks/useForgotPassword.jsx';
 import api from '../utils/api.js';
 
 
 const ForgotPassword = () => {
 
-    const { navigate, isSendingEmail,email, isMailSent, handleSubmit, register, errors, onSubmit, reset } = useForgotPassword();
+    const { navigate, isSendingEmail,email, isMailSent, handleSubmit, register, errors, onSubmit } = useForgotPassword();
 
     useEffect(()=>{
         if(!isMailSent || !email){

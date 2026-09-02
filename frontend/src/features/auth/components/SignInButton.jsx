@@ -1,8 +1,9 @@
 import {motion} from "framer-motion";
 import useAuthStore from "../../../store/auth.store.js";
 
-const SignInButton = ({title})=>{
-  const {loading} = useAuthStore();
+const SignInButton = ({title,loading})=>{
+
+
   return (
 
 <motion.button

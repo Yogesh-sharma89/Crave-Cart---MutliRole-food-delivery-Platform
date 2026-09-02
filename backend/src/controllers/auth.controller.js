@@ -1,13 +1,16 @@
 import UserModel from "../models/user.model.js";
-import { verifyToken, GenerateJwtToken } from "../utils/token.js";
+import { GenerateJwtToken } from "../utils/token.js";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
-import crypto from "crypto";
+import crypto, { hash } from "crypto";
 import SendMail from "../utils/SendMail.js";
 import { ForgotPasswordMailTemplate } from "../templates/ForgotPassword.js";
 import { ResetPasswordTemplate } from "../templates/ResetPassword.js";
 import { auth } from "../config/firebase.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { UploadAvatar } from "../service/cloudinary.service.js";
+import { GenerateOtp } from "../utils/generateOtp.js";
+import AccountRecoveryOtpTemplate from "../templates/AccountRecoverOtp.js";
 
 dotenv.configDotenv();
 
@@ -39,9 +42,19 @@ export const Signup = async (req, res) => {
 
         const existingUser = await UserModel.findOne({ email });
 
+        if ( existingUser &&  existingUser.deletedAt) {
+            return res.status(403).json({
+                success: false,
+                status: "scheduled_for_deletion",
+                message: "Your account is scheduled for deletion. Please use the recovery portal to reactivate it."
+            });
+        }
+
+
         if (existingUser) {
             return res.status(400).json({ message: "User Already exists" })
         }
+
 
         //If user not exists then create user in DB 
         const user = await UserModel.create({
@@ -70,7 +83,8 @@ export const Signup = async (req, res) => {
 
 
     } catch (err) {
-        res.status(400).json({ success: false, error: err.message });
+        console.log("Error in backend signup controller :", err)
+        res.status(500).json({ success: false, error: err.message });
     }
 }
 
@@ -94,6 +108,15 @@ export const SignIn = async (req, res) => {
             return res.status(400).json({ message: "Please create you account before login" })
         }
 
+        ///check for deleted
+        if (existingUser.deletedAt) {
+            return res.status(403).json({
+                success: false,
+                status: "scheduled_for_deletion",
+                message: "Your account is scheduled for deletion. Please use the recovery portal to reactivate it."
+            });
+        }
+
         if (!existingUser.password) {
             return res.status(400).json({ message: "You don't have password! Continue with google " })
         }
@@ -105,6 +128,8 @@ export const SignIn = async (req, res) => {
             return res.status(400).json({ message: "Invalid email or password" })
         }
 
+
+
         const jwtToken = GenerateJwtToken(existingUser._id);
 
         res.cookie("token", jwtToken, {
@@ -115,9 +140,11 @@ export const SignIn = async (req, res) => {
 
         });
 
+        const validExistingUser = existingUser.toObject();
+
         return res.status(200).json({
             message: "User login successfull", user: {
-                ...existingUser, password: undefined
+                ...validExistingUser, password: undefined
             }
         })
 
@@ -160,9 +187,6 @@ export const checkAuth = async (req, res) => {
             user
         })
 
-
-
-
     } catch (err) {
         return res.status(400).json({
             message: "Failed to get user details",
@@ -200,7 +224,7 @@ export const ForgotPassword = async (req, res) => {
         const token = crypto.randomBytes(32).toString("base64url");
 
         user.resetPasswordToken = token,
-        user.resetPasswordTokenExpireAt = Date.now() + 30 * 60 * 1000; //30 minutes
+            user.resetPasswordTokenExpireAt = Date.now() + 30 * 60 * 1000; //30 minutes
 
         await user.save();
 
@@ -230,6 +254,7 @@ export const ForgotPassword = async (req, res) => {
 export const ResetPassword = async (req, res) => {
 
     const { token, password } = req.body;
+
     if (!token || !password) {
         return res.status(400).json({
             message: "Invalid request , missing required credentials",
@@ -251,14 +276,21 @@ export const ResetPassword = async (req, res) => {
             })
         }
 
+        console.log(user);
+
         //then set the password to new password and delete token from db 
         user.password = password;
         user.resetPasswordToken = undefined;
         user.resetPasswordTokenExpireAt = undefined;
 
+        if(user.deletedAt){
+            user.deletedAt = null;
+        }
+
         await user.save();
 
-        await SendMail({
+        //send email in background
+        SendMail({
             subject: "✅ Your CraveCart Password Has Been Reset Successfully",
             html: ResetPasswordTemplate.replaceAll("{{USERNAME}}", user.fullname),
             email: user.email
@@ -273,7 +305,7 @@ export const ResetPassword = async (req, res) => {
     } catch (err) {
 
         return res.status(400).json({
-            message: "Failed to reset password",
+            message: err.message || "Failed to reset password",
             success: false
         })
 
@@ -296,7 +328,8 @@ export const CheckResetToken = async (req, res) => {
         if (!user) {
             return res.status(404).json({
                 message: "This password reset link is invalid or has already been used.",
-                success: false
+                success: false,
+                isTokenValid: false
             });
         }
 
@@ -312,14 +345,16 @@ export const CheckResetToken = async (req, res) => {
             // : The token was real, but the user clicked it too late
             return res.status(410).json({ // 410 Gone is ideal for expired resources
                 message: "This password reset link has expired. Please request a new one.",
-                success: false
+                success: false,
+                isTokenValid: false
             });
         }
 
 
         return res.status(200).json({
             message: "Token is verified",
-            success: true
+            success: true,
+            isTokenValid: true
         })
     } catch (err) {
         return res.status(400).json({
@@ -350,14 +385,27 @@ export const googleAuth = async (req, res) => {
 
         let user = await UserModel.findOne({ email }).select("-password");
 
+        if (user.deletedAt) {
+            return res.status(403).json({
+                success: false,
+                status: "scheduled_for_deletion",
+                message: "Your account is scheduled for deletion. Please use the recovery portal to reactivate it."
+            });
+        }
+
         if (!user) {
+
+            ///upload the avatat to cloudinary 
+            const uploadRes = await UploadAvatar(picture);
+
             user = await UserModel.create({
                 fullname: name,
                 email,
                 isVerified: {
                     email: email_verified
                 },
-                avatarUrl: picture,
+                avatarUrl: uploadRes?.secure_url || picture,
+                avatarId: uploadRes?.public_id,
                 provider: "google",
                 firebaseId: uid,
                 role
@@ -367,7 +415,7 @@ export const googleAuth = async (req, res) => {
 
 
         //now generate token 
-        const token = GenerateJwtToken(user.toObject()._id);
+        const token = GenerateJwtToken(user._id);
 
         res.cookie("token", token, {
             httpOnly: true,
@@ -382,18 +430,19 @@ export const googleAuth = async (req, res) => {
             user
         })
     } catch (err) {
-        return res.status(400).json({
+        return res.status(500).json({
             message: "Failed to authenticate with google",
             success: false,
-            error: err.message
+            error: err?.message
         })
     }
 
 
 }
 
-export const UpdatePhone = async (req, res) => {
-    const { phone, email } = req.body;
+export const CompleteProfile = async (req, res) => {
+
+    const { phone, role } = req.body;
 
     if (!phone || !phone.trim() || phone.length < 10) {
         return res.status(400).json({
@@ -402,9 +451,20 @@ export const UpdatePhone = async (req, res) => {
         })
     }
 
+    const allowedRoles = ["user", "owner", "deliveryBoy"]
+
+    if (!role.trim() || !allowedRoles.includes(role)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid role"
+        })
+    }
+
+    const userId = req.userId;
+
     try {
 
-        const user = await UserModel.findOne({ email }).select("-password");
+        const user = await UserModel.findById(userId).select("-password");
 
         if (!user) {
             return res.status(401).json({
@@ -416,6 +476,7 @@ export const UpdatePhone = async (req, res) => {
         if (!user.phone) {
             user.phone = phone;
             user.isVerified.phone = true;
+            user.role = role
             await user.save();
 
             return res.status(200).json({
@@ -426,21 +487,18 @@ export const UpdatePhone = async (req, res) => {
         }
 
         return res.status(400).json({
-            message: "Mobile numebr already exists",
+            message: "Mobile number already exists",
             success: false
         })
 
     } catch (err) {
         return res.status(400).json({
-            message: "Failed to update number",
+            message: "Failed to complete profile",
             success: false,
             error: err.message
         })
 
     }
-
-
-
 }
 
 export const checkResetPasswordStatus = asyncHandler(async (req, res) => {
@@ -479,3 +537,148 @@ export const checkResetPasswordStatus = asyncHandler(async (req, res) => {
 
 
 })
+
+
+export const DeleteAccount = asyncHandler(async (req, res) => {
+
+    const user = req.user;
+
+    if(user.deletedAt){
+         return res.status(401).json({
+        success: true,
+        message: "Your account has been already scheduled for deletion."
+    });
+
+    }
+
+    user.deletedAt = new Date();
+
+    await user.save();
+
+    //clear the cookies
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+    })
+
+    return res.status(200).json({
+        success: true,
+        message: "Your account has been scheduled for deletion. You have 15 days to recover it before permanent erasure."
+    });
+})
+
+export const SendEmailOtp = asyncHandler(async (req, res) => {
+
+    const { email } = req.body;
+
+    if (!email.trim()) {
+        res.status(400);
+        throw new Error("Invalid Email")
+    }
+
+    //check email
+    if (!emailRegex.test(email)) {
+        res.status(400);
+        throw new Error("Invalid Email")
+    }
+
+    //find the user bases on this email 
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    //create otp and send on email
+    const otp = GenerateOtp(6);
+
+    //hash the otp before storing
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+
+    user.recoveryOtp = hashedOtp;
+    user.recoveryOtpExpireAt = otpExpiry;
+    await user.save();
+
+    //send email in background 
+    SendMail({
+        subject: "🔒 Your CraveCart Account Recovery Verification Code",
+        email: user.email,
+        html: AccountRecoveryOtpTemplate(user.fullname, otp, 5)
+    })
+
+    return res.status(200).json({
+        success: true,
+        message: "A verification code has been sent to your inbox."
+    });
+
+})
+
+export const VerifyOtp = asyncHandler(async (req, res) => {
+
+    const { email, otp } = req.body;
+
+    if (!email.trim() || !otp.trim()) {
+        res.status(400);
+        throw new Error("Invalid email or otp");
+    }
+
+    //check email
+    if (!emailRegex.test(email)) {
+        res.status(400);
+        throw new Error("Invalid Email")
+    }
+
+    if (otp.length < 6) {
+        res.status(400)
+        throw new Error("Invalid Otp")
+    }
+
+    //find the user bases on this email 
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    const hashedUserOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    if (hashedUserOtp !== user.recoveryOtp) {
+        res.status(400);
+        throw new Error("Wrong Otp . Please enter valid OTP")
+    }
+
+    const isExpired = user.recoveryOtpExpireAt && user.recoveryOtpExpireAt.getTime() < Date.now();
+
+    if (isExpired) {
+
+        user.recoveryOtp = undefined;
+        user.recoveryOtpExpireAt = undefined;
+        await user.save();
+
+        res.status(401);
+        throw new Error("This code has expired. Please click resend to get a new one.")
+    }
+
+    const resetPasswordToken = crypto.randomBytes(32).toString("hex");
+    const tokenExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    user.recoveryOtp = undefined;
+    user.recoveryOtpExpireAt = undefined;
+    user.resetPasswordToken = resetPasswordToken;
+    user.resetPasswordTokenExpireAt = tokenExpiry;
+    await user.save();
+
+    return res.status(200).json({
+        success: true,
+        message: "Security code verified successfully.",
+        token: resetPasswordToken
+    });
+
+})
+
+

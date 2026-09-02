@@ -1,13 +1,15 @@
-import React from 'react'
-import useCreateShop from '../hooks/useCreateShop';
-import { FiAlertCircle, FiArrowRight, FiFlag, FiGlobe, FiHash, FiHome, FiImage, FiLoader, FiMapPin, FiUploadCloud, FiX } from 'react-icons/fi';
-import { ErrorText, Field } from '../pages/CreateShop';
+
+import { FiAlertCircle, FiArrowRight,FiFlag, FiGlobe, FiHash, FiHome, FiImage, FiLoader, FiMapPin, FiUploadCloud, FiX } from 'react-icons/fi';
 import { AnimatePresence, motion } from 'framer-motion';
 
-const ShopForm = ({ form, onSubmit,loading,mode }) => {
+import ErrorText from './ErrorText';
 
-    const { register, errors, handleSubmit, setValue, handleDrag, handleDrop, handleFile,
-        removeImage, handleInputChange, isDragActive, imagePreview} = form;
+
+const ShopForm = ({ form, onSubmit, loading, mode }) => {
+
+    const { register, errors, handleSubmit, handleDrag, handleDrop,
+        removeImage, handleInputChange, isDragActive, imagePreview, } = form;
+
 
     return (
         <div className="px-6 py-8 sm:px-10 sm:py-10">
@@ -36,55 +38,112 @@ const ShopForm = ({ form, onSubmit,loading,mode }) => {
                 noValidate
                 className="space-y-5"
             >
-                <Field
-                    label="Shop Name"
-                    icon={<FiHome size={16} />}
-                    error={errors.shopName}
-                    placeholder="Coffee House"
-                    autoComplete="organization"
-                    registration={register("shopName", {
-                        required: "Shop name is required",
-                        minLength: {
-                            value: 2,
-                            message: "Shop name must be at least 2 characters",
-                        },
-                        maxLength: {
-                            value: 60,
-                            message: "Shop name must be under 60 characters",
-                        },
-                    })}
-                />
+
+                <div>
+                    <label className="mb-1.5 block text-sm font-medium text-[#231C12]">
+                        Shop Name
+                    </label>
+
+                    <div className="relative">
+                        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#A99A82]">
+                            <FiHome size={16} />
+                        </span>
+
+                        <input
+                            type="text"
+                            placeholder="Coffee House"
+                            autoComplete="organization"
+                            {...register("shopName", {
+                                required: "Shop name is required",
+                                minLength: {
+                                    value: 2,
+                                    message: "Shop name must be at least 2 characters",
+                                },
+                                maxLength: {
+                                    value: 60,
+                                    message: "Shop name must be under 60 characters",
+                                },
+                            })}
+                            className={`h-12 w-full rounded-2xl border bg-[#F7F1E6] pl-11 pr-4 text-sm text-[#231C12] outline-none transition placeholder:text-[#A99A82] focus:bg-white focus:ring-4 ${errors.shopName
+                                ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                                : "border-[#1F1A12]/10 focus:border-[#B8823B]/70 focus:ring-[#B8823B]/15"
+                                }`}
+                        />
+                    </div>
+
+                    {errors.shopName && (
+                        <ErrorText message={errors.shopName.message} />
+                    )}
+                </div>
+
+
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <Field
-                        label="City"
-                        icon={<FiMapPin size={16} />}
-                        error={errors.city}
-                        placeholder="New Delhi"
-                        autoComplete="address-level2"
-                        registration={register("city", {
-                            required: "City is required",
-                            minLength: {
-                                value: 2,
-                                message: "City must be at least 2 characters",
-                            },
-                        })}
-                    />
+                    <div>
+                        <label className="mb-1.5 block text-sm font-medium text-[#231C12]">
+                            City
+                        </label>
 
-                    <Field
-                        label="State"
-                        icon={<FiFlag size={16} />}
-                        error={errors.state}
-                        placeholder="Delhi"
-                        autoComplete="address-level1"
-                        registration={register("state", {
-                            required: "State is required",
-                            minLength: {
-                                value: 2,
-                                message: "State must be at least 2 characters",
-                            },
-                        })}
-                    />
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#A99A82]">
+                                <FiMapPin size={16} />
+                            </span>
+
+                            <input
+                                type="text"
+                                placeholder="New Delhi"
+                                autoComplete="address-level2"
+                                {...register("city", {
+                                    required: "City is required",
+                                    minLength: {
+                                        value: 2,
+                                        message: "City must be at least 2 characters",
+                                    },
+                                })}
+                                className={`h-12 w-full rounded-2xl border bg-[#F7F1E6] pl-11 pr-4 text-sm text-[#231C12] outline-none transition placeholder:text-[#A99A82] focus:bg-white focus:ring-4 ${errors.city
+                                    ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                                    : "border-[#1F1A12]/10 focus:border-[#B8823B]/70 focus:ring-[#B8823B]/15"
+                                    }`}
+                            />
+                        </div>
+
+                        {errors.city && (
+                            <ErrorText message={errors.city.message} />
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="mb-1.5 block text-sm font-medium text-[#231C12]">
+                            State
+                        </label>
+
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#A99A82]">
+                                <FiFlag size={16} />
+                            </span>
+
+                            <input
+                                type="text"
+                                placeholder="Delhi"
+                                autoComplete="address-level1"
+                                {...register("state", {
+                                    required: "State is required",
+                                    minLength: {
+                                        value: 2,
+                                        message: "State must be at least 2 characters",
+                                    },
+                                })}
+                                className={`h-12 w-full rounded-2xl border bg-[#F7F1E6] pl-11 pr-4 text-sm text-[#231C12] outline-none transition placeholder:text-[#A99A82] focus:bg-white focus:ring-4 ${errors.state
+                                        ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                                        : "border-[#1F1A12]/10 focus:border-[#B8823B]/70 focus:ring-[#B8823B]/15"
+                                    }`}
+                            />
+                        </div>
+
+                        {errors.state && (
+                            <ErrorText message={errors.state.message} />
+                        )}
+                    </div>
                 </div>
 
                 {/* Address textarea */}
@@ -119,36 +178,73 @@ const ShopForm = ({ form, onSubmit,loading,mode }) => {
                 </div>
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <Field
-                        label="Country"
-                        icon={<FiGlobe size={16} />}
-                        error={errors.country}
-                        placeholder="India"
-                        autoComplete="country-name"
-                        registration={register("country", {
-                            required: "Country is required",
-                            minLength: {
-                                value: 2,
-                                message: "Country must be at least 2 characters",
-                            },
-                        })}
-                    />
 
-                    <Field
-                        label="Pincode"
-                        icon={<FiHash size={16} />}
-                        error={errors.pincode}
-                        placeholder="110001"
-                        autoComplete="postal-code"
-                        inputMode="numeric"
-                        registration={register("pincode", {
-                            required: "Pincode is required",
-                            pattern: {
-                                value: /^[1-9][0-9]{5}$/,
-                                message: "Enter a valid 6-digit pincode",
-                            },
-                        })}
-                    />
+                    <div>
+                        <label className="mb-1.5 block text-sm font-medium text-[#231C12]">
+                            Country
+                        </label>
+
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#A99A82]">
+                                <FiGlobe size={16} />
+                            </span>
+
+                            <input
+                                type="text"
+                                placeholder="India"
+                                autoComplete="country-name"
+                                {...register("country", {
+                                    required: "Country is required",
+                                    minLength: {
+                                        value: 2,
+                                        message: "Country must be at least 2 characters",
+                                    },
+                                })}
+                                className={`h-12 w-full rounded-2xl border bg-[#F7F1E6] pl-11 pr-4 text-sm text-[#231C12] outline-none transition placeholder:text-[#A99A82] focus:bg-white focus:ring-4 ${errors.country
+                                    ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                                    : "border-[#1F1A12]/10 focus:border-[#B8823B]/70 focus:ring-[#B8823B]/15"
+                                    }`}
+                            />
+                        </div>
+
+                        {errors.country && (
+                            <ErrorText message={errors.country.message} />
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="mb-1.5 block text-sm font-medium text-[#231C12]">
+                            Pincode
+                        </label>
+
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#A99A82]">
+                                <FiHash size={16} />
+                            </span>
+
+                            <input
+                                type="text"
+                                placeholder="110001"
+                                autoComplete="postal-code"
+                                inputMode="numeric"
+                                {...register("pincode", {
+                                    required: "Pincode is required",
+                                    pattern: {
+                                        value: /^[1-9][0-9]{5}$/,
+                                        message: "Enter a valid 6-digit pincode",
+                                    },
+                                })}
+                                className={`h-12 w-full rounded-2xl border bg-[#F7F1E6] pl-11 pr-4 text-sm text-[#231C12] outline-none transition placeholder:text-[#A99A82] focus:bg-white focus:ring-4 ${errors.pincode
+                                    ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                                    : "border-[#1F1A12]/10 focus:border-[#B8823B]/70 focus:ring-[#B8823B]/15"
+                                    }`}
+                            />
+                        </div>
+
+                        {errors.pincode && (
+                            <ErrorText message={errors.pincode.message} />
+                        )}
+                    </div>
                 </div>
 
                 {/* Shop image — drag & drop with preview */}

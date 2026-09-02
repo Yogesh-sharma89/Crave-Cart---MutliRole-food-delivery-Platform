@@ -1,49 +1,60 @@
-import React from 'react';
+
 import { motion } from 'framer-motion'; // 🌟 Smooth animation engine
 import { FcGoogle } from 'react-icons/fc'; // Official Google brand mark
 import { FiArrowRight } from 'react-icons/fi'; // Minimal interaction icon
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../../../config/firebase.config.js';
 import { toast } from 'sonner';
-import useAuthStore from '../../../store/auth.store.js';
 import FullScreenLoader from './Loader.jsx';
 import { useNavigate } from 'react-router';
 import useAuth from '../../../hooks/useAuth.jsx';
+import useGoogleAuth from '../hooks/useGoogleAuth.jsx';
 
+// err.response?.data?.message || "Failed to authencticate with google"
 export default function GoogleButton() {
 
-   const navigate = useNavigate();
+  const navigate = useNavigate();
 
-  const {googleAuth,isCheckingGoogleAuth,error} = useAuthStore();
-  const {role} = useAuth();
+  const { mutateAsync: googleAuth, isPending } = useGoogleAuth();
+  const { role } = useAuth();
 
   const handleGoolgeAuth = async () => {
-    
+
     try {
       const provider = new GoogleAuthProvider();
+
       const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
 
       //now send this token to backend
 
-      await toast.promise(googleAuth(idToken,role),{
-        success:()=>{
-          navigate("/")
+      await toast.promise(googleAuth({ idToken, role }), {
+        loading: 'Authenticating with Google...',
+        success: () => {
           return "Google authentication successfull"
         },
-        error:(err)=>error ||  err.message
-      })
-      
+        error: (err) => {
+          if (err.response?.status === 403 && err.response?.data?.status === "scheduled_for_deletion") {
+            navigate("/recover-account");
+            return err.response.data.message || "Account is frozen";
+          }
+
+          return err.response?.data?.message || "Failed to authencticate with google"
+
+        }
+      }).unwrap();
+
+      navigate("/");
 
     } catch (err) {
-     console.log(err.message);
+      console.log(err.message);
     }
 
   }
 
-  if(isCheckingGoogleAuth){
+  if (isPending) {
     return (
-      <FullScreenLoader text='Please wait...'/>
+      <FullScreenLoader text='Please wait...' />
     )
   }
 
@@ -52,6 +63,7 @@ export default function GoogleButton() {
       <motion.button
         type='button'
         onClick={handleGoolgeAuth}
+        disabled={isPending}
         // 💫 Framer Motion Initial & Hover Settings
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}

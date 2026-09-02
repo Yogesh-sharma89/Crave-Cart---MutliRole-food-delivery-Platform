@@ -1,39 +1,50 @@
 import { useForm } from "react-hook-form"
-import useShopStore from "../../../../store/shop.store";
-import { useNavigate } from "react-router";
 import useLocationStore from "../../../../store/location.store";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const useShopForm = (Data) => {
 
     const { location } = useLocationStore();
-    const navigate = useNavigate();
-
-    const initialData =  JSON.parse(localStorage.getItem("currentShop")) ?? Data;
-
 
     const { register,
         handleSubmit,
         setError,
         setValue,
         reset,
-        formState: { errors, isSubmitting }, } = useForm({
-            defaultValues: initialData ||
-            {
+        formState: { errors } } = useForm({
+            mode: "onChange",
+            values: Data?._id ? {
+                shopName: Data.shopName || "",
+                city: Data.city || "",
+                state: Data.state || "",
+                address: Data.address || "",
+                country: Data.country || "",
+                pincode: Data.pincode || "",
+                shopImage: Data.shopImage || ""
+            } : {
                 shopName: "",
                 city: "",
-                state: location?.state ?? "",
+                state: location?.state || "",
                 address: "",
-                country: location?.country ?? "",
-                pincode: location?.postcode ?? "",
-                shopImage: ""
-            }
+                country: location?.country || "",
+                pincode: location?.postcode || "",
+                shopImage: null
+            },
+            shouldUnregister: false,
+            shouldFocusError: true
 
         })
 
 
+    useEffect(() => {
+        if (Data?.shopImage) {
+            setImagePreview(Data.shopImage);
+        } else {
+            setImagePreview(null);
+        }
+    }, [Data?.shopImage]);
 
-    const [imagePreview, setImagePreview] = useState(initialData?.shopImage || null);
+    const [imagePreview, setImagePreview] = useState(null);
     const [isDragActive, setIsDragActive] = useState(false);
 
     const handleFile = useCallback((file) => {
@@ -102,7 +113,7 @@ const useShopForm = (Data) => {
 
     return {
         register, errors, handleSubmit, setValue, handleDrag, handleDrop, handleFile,
-        removeImage, handleInputChange, isDragActive, imagePreview,setError,reset
+        removeImage, handleInputChange, isDragActive, imagePreview, setError, reset,setValue
     }
 
 }

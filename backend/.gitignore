@@ -2,3 +2,4 @@
 .env.local
 firebase-admin.json
 node_modules
+dist

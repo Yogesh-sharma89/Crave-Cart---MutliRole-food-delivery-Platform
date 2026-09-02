@@ -1,25 +1,26 @@
-import React from 'react'
-import useAuthStore from '../store/auth.store.js'
-import { FiLoader } from 'react-icons/fi';
 import { Navigate, Outlet } from 'react-router';
 import FullScreenLoader from '../features/auth/components/Loader.jsx';
+import useAuthUser from '../features/auth/hooks/useAuthUser.jsx';
 
-const PublicRoute = ({ children }) => {
 
-  const { loading, isAuthenticated } = useAuthStore();
+const PublicRoute = () => {
 
-  if (loading) {
+  const {isLoading,data:user} = useAuthUser();
+
+  if (isLoading) {
     return (
       <FullScreenLoader/>
     )
   }
 
+  const isAuthenticated = Boolean(user);
+
   if (isAuthenticated) {
-    return <Navigate to={'/user'} replace />
+    return <Navigate to={'/'} replace />
   }
   return (
     <>
-      { children ? children : <Outlet/>}
+       <Outlet/>
     </>
   )
 }

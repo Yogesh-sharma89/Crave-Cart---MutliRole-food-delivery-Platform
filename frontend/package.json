@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.2",
+    "@tanstack/react-query": "^5.101.4",
     "axios": "^1.18.1",
     "firebase": "^12.16.0",
     "framer-motion": "^12.42.2",
@@ -37,5 +38,9 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "oxlint": "^1.71.0",
     "vite": "^8.1.1"
+  },
+  "allowScripts": {
+    "@firebase/util@1.15.1": true,
+    "protobufjs@7.6.5": true
   }
 }

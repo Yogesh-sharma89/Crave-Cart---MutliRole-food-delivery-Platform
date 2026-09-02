@@ -1,6 +1,5 @@
-import { useState, useCallback } from "react";
-import { useForm } from "react-hook-form";
-import { motion, AnimatePresence } from "framer-motion";
+
+import { motion } from "framer-motion";
 import {
     FiHome,
     FiMapPin,
@@ -15,8 +14,6 @@ import {
     FiImage,
 } from "react-icons/fi";
 
-import { useNavigate } from "react-router";
-import { toast } from "sonner";
 import useCreateShop from "../hooks/useCreateShop";
 import ShopForm from "../components/ShopForm";
 
@@ -153,7 +150,6 @@ const CreateShop = () => {
                        onSubmit={onSubmit}
                        form={form}
                        loading={isCreating}
-
                        />
                     </div>
                 </motion.div>
@@ -162,49 +158,9 @@ const CreateShop = () => {
     );
 };
 
-// Reusable labeled input with icon + inline error state
-export const Field = ({
-    label,
-    icon,
-    error,
-    registration,
-    placeholder,
-    autoComplete,
-    inputMode,
-}) => (
-    <div>
-        <label className="mb-1.5 block text-sm font-medium text-[#231C12]">
-            {label}
-        </label>
-        <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A99A82]">
-                {icon}
-            </span>
-            <input
-                type="text"
-                placeholder={placeholder}
-                autoComplete={autoComplete}
-                inputMode={inputMode}
-                {...registration}
-                className={`h-12 w-full rounded-2xl border bg-[#F7F1E6] pl-11 pr-4 text-sm text-[#231C12] outline-none transition placeholder:text-[#A99A82] focus:bg-white focus:ring-4 ${error
-                    ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                    : "border-[#1F1A12]/10 focus:border-[#B8823B]/70 focus:ring-[#B8823B]/15"
-                    }`}
-            />
-        </div>
-        {error && <ErrorText message={error.message} />}
-    </div>
-);
 
-export const ErrorText = ({ message }) => (
-    <motion.p
-        initial={{ opacity: 0, y: -4 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mt-1.5 flex items-center gap-1 text-xs font-medium text-red-500"
-    >
-        <FiAlertCircle size={12} />
-        {message}
-    </motion.p>
-);
+
+
+
 
 export default CreateShop;

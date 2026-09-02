@@ -1,19 +1,24 @@
 import express from "express";
-import dotenv from "dotenv";
+
 import cors from "cors";
 import ConnectToDb from "./src/config/db.js";
 import authRouter from "./src/routes/auth.route.js";
 import cookieParser from "cookie-parser";
 import userRouter from "./src/routes/user.route.js";
 import shopRouter from "./src/routes/shop.route.js";
+import { GlobalMiddleware } from "./src/middleware/GlobalMiddleware.js";
+import { CheckDeletion } from "./src/middleware/CheckDeletion.js";
+import { ProtectRoute } from "./src/middleware/ProtectRoute.js";
+import mainRouter from "./src/routes/main.routes.js";
 
-dotenv.config({ debug: true });
+
 
 const app = express();
 
 //middleware if json data came then parse it into js objects
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(cors({
   origin: [process.env.BASE_URL],
   credentials: true,
@@ -23,33 +28,15 @@ app.use(cors({
 
 app.use(cookieParser());
 
-const port = process.env.PORT || 5000;
 
-//api routes 
-app.use("/api/auth", authRouter);
-app.use("/api/user", userRouter);
-app.use("/api/shop", shopRouter)
+app.use("/api",mainRouter);
 
 app.get("/health-check", (req, res) => {
   res.json({ message: "Server is up and running", success: true });
 });
 
-const IntializeConnetion = async () => {
-  try {
-    await ConnectToDb();
 
-    app.listen(port, () => {
-      console.log(`Server is listening at port ${port}`);
-    });
-
-  } catch (err) {
-    console.log("Error in intialize connection ", err.message)
-    process.exit(1);
-  }
-};
-
-IntializeConnetion();
-
+//Global error middleware
 app.use((err, req, res, next) => {
 
 
@@ -77,5 +64,7 @@ app.use((err, req, res, next) => {
 
 
 })
+
+export default app;
 
 

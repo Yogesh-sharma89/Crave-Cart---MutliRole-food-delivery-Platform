@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
-dotenv.configDotenv({debug:true})
+dotenv.config();
 
 const db_url = process.env.DB_URL;
 
@@ -17,6 +17,7 @@ const ConnectToDb = async ()=>{
 
      }catch(err){
         console.log(`Error in connecting db ${err.message}`)
+        process.exit(1)
      }
 }
 

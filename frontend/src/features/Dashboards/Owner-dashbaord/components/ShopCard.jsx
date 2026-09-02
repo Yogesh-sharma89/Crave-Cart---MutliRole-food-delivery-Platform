@@ -1,23 +1,17 @@
 import { motion } from "framer-motion";
 import { FiMapPin, FiHome, FiGlobe, FiHash, FiExternalLink, FiEdit2 } from "react-icons/fi";
 import { useNavigate } from "react-router";
-import useShopStore from "../../../../store/shop.store";
 
 const ShopCard = ({ shop, index = 0 }) => {
 
     const navigate = useNavigate();
 
-    const isActive = !shop.isDeleted === "active";
+    const isActive = !shop.isDeleted;
 
-    const {setCurrentShop,currentShop} = useShopStore();
-    
 
-   const handleEdit = ()=>{
-      //set current shop to shop and shopId to id 
-      console.log("Shop  in shop card : ",shop)
-      setCurrentShop(shop);
-      navigate(`/owner/shops/${shop._id}/edit`)
-   }
+    const handleShop = (url) => {
+        navigate(url);
+    }
 
     return (
         <motion.div
@@ -44,8 +38,8 @@ const ShopCard = ({ shop, index = 0 }) => {
                 <div className="absolute right-4 top-4">
                     <span
                         className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold backdrop-blur-md ${isActive
-                                ? "bg-white/20 text-white"
-                                : "bg-black/30 text-white/80"
+                            ? "bg-white/20 text-white"
+                            : "bg-black/30 text-white/80"
                             }`}
                     >
                         <motion.span
@@ -108,17 +102,18 @@ const ShopCard = ({ shop, index = 0 }) => {
                 <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => navigate(`/owner/shops/${shop.id}`)}
+                    onClick={()=>handleShop(`/owner/shops/${shop._id}`)}
                     className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-[#B8823B] to-[#96652A] px-4 py-3 text-sm font-semibold text-white shadow-md shadow-[#B8823B]/25 transition"
                 >
                     <FiExternalLink size={15} />
                     <span >Open Shop</span>
                 </motion.button>
 
+
                 <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={handleEdit}
+                    onClick={()=>handleShop(`/owner/shops/${shop._id}/edit`)}
                     className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-[#1F1A12]/12 bg-[#F7F1E6] px-4 py-2.5 text-sm font-semibold text-[#231C12] transition hover:border-[#B8823B]/50 hover:bg-[#B8823B]/10"
                 >
                     <FiEdit2 size={15} />

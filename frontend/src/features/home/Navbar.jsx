@@ -19,6 +19,7 @@ import ProfileMenu from "../Dashboards/Owner-dashbaord/components/ProfileMenu";
 const cartItems = 3;
 
 const Navbar = () => {
+
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showProfile, setShowProfile] = useState(false)
 
@@ -47,7 +48,6 @@ const Navbar = () => {
                 <div className="mx-auto max-w-7xl w-[94%] ">
 
                     <nav className="flex select-none  h-20 rounded-full bg-white/85 shadow-[0_20px_60px_rgba(31,26,18,0.12)] ring-1 ring-[#1F1A12]/6 backdrop-blur-2xl items-center justify-between gap-4 px-4 lg:px-8">
-
 
 
                         {/* Brand */}

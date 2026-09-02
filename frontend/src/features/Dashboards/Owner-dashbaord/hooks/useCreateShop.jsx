@@ -1,39 +1,43 @@
-import React from 'react';
+
 import { toast } from 'sonner';
-import useShopStore from '../../../../store/shop.store';
-import { useNavigate } from 'react-router';
+
 import useShopForm from './useShopForm';
+import { useNavigate } from 'react-router';
+import useCreateShopMutation from './useCreateShopMutation';
 
 const useCreateShop = () => {
-    
-   const form = useShopForm();
 
-    const { createShop, isCreating, error } = useShopStore();
+    const form = useShopForm(null);
+
+    const navigate = useNavigate();
+
+     const { mutateAsync: createShop, isPending: isCreating } = useCreateShopMutation();
 
     const onSubmit = async (data) => {
 
-        const { shopName, city, state, address, country, pincode, shopImage } = data;
+        const { shopImage } = data;
+        console.log(data);
+
         if (!shopImage) {
             toast.error("Please upload shop image");
             return;
         }
         try {
 
-            await toast.promise(createShop(data), {
+            await toast.promise(createShop({data}), {
                 loading: "Creating your shop",
                 success: () => {
-                    reset()
-                    navigate("/owner");
-
                     return "Shop created successfully"
                 },
                 error: (err) => err.message || error
             })
 
+            form.reset();
+            navigate("/owner");
 
         } catch (err) {
             // Surface server-side / network errors inline instead of failing silently
-            setError("root", {
+            form.setError("root", {
                 type: "server",
                 message:
                     err?.response?.data?.message ||
@@ -43,7 +47,7 @@ const useCreateShop = () => {
     };
 
     return {
-      onSubmit,form,isCreating
+        onSubmit, form, isCreating
     }
 }
 

@@ -12,29 +12,21 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router";
 import ProfileMenu from "./ProfileMenu";
-import useShopStore from "../../../../store/shop.store";
+import useGetShops from "../hooks/useGetShops";
 
 
-// // TODO: replace with real data from your shop store / API
-// const myShops = [
-//     { id: "1", name: "Coffee House", emoji: "☕" },
-//     { id: "2", name: "Pizza Palace", emoji: "🍕" },
-//     { id: "3", name: "Burger Express", emoji: "🍔" },
-//     { id: "4", name: "Noodle Point", emoji: "🍜" },
-// ];
 
 const OwnerNavbar = () => {
  
     const [mobileOpen, setMobileOpen] = useState(false);
 
-    const {shops}  = useShopStore();
-
+    const {data:shops} = useGetShops();
     const [showProfile, setShowProfile] = useState(false);
 
     const [shopMenuOpen, setShopMenuOpen] = useState(false);
 
     const [shopSearch, setShopSearch] = useState("");
-    const [activeShop, setActiveShop] = useState(shops[0]);
+    const [activeShop, setActiveShop] = useState(shops?.[0]);
 
     const navigate = useNavigate();
 
@@ -66,7 +58,7 @@ const OwnerNavbar = () => {
         setActiveShop(shop);
         setShopMenuOpen(false);
         setShopSearch("");
-        navigate(`/owner/shops/${shop.id}`)
+        navigate(`/owner/shops/${shop?._id}`)
     };
 
     return (
@@ -100,6 +92,7 @@ const OwnerNavbar = () => {
                                     Owner Dashboard
                                 </p>
                             </div>
+
                         </motion.div>
 
                         {/* Desktop */}
@@ -173,7 +166,7 @@ const OwnerNavbar = () => {
                                                             whileHover={{ x: 3 }}
                                                             onClick={() => handleSelectShop(shop)}
                                                             className={`group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${activeShop?.id === shop.id
-                                                                ? "bg-[#B8823B]/10"
+                                                                ? "bg-[#B8823B]/10 mb-2.5"
                                                                 : "hover:bg-[#F7F1E6]"
                                                                 }`}
                                                         >
